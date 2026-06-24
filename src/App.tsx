@@ -7,7 +7,7 @@ import { RoleGuard } from "@/components/role-guard"
 function lazyLoad<T extends Record<string, React.ComponentType<any>>, K extends keyof T>(loader: () => Promise<T>, name: K) {
   return lazy(() => loader().then(m => ({ default: m[name] })))
 }
-
+// asdsa
 const LoginPage = lazyLoad(() => import("@/pages/auth/login/page"), "LoginPage")
 const DashboardPage = lazyLoad(() => import("@/pages/dashboard/page"), "DashboardPage")
 const ProductPage = lazyLoad(() => import("@/pages/product/page"), "ProductPage")
