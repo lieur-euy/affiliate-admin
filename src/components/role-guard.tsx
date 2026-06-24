@@ -15,7 +15,7 @@ export function RoleGuard({ roles, children, fallback }: RoleGuardProps) {
 
   if (!roles.includes(user.role)) {
     if (fallback) return <>{fallback}</>
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/media" replace />
   }
 
   return <>{children}</>

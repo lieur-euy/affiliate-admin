@@ -12,7 +12,7 @@ interface AuthState {
   user: UserResponse | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<UserResponse>
   logout: () => Promise<void>
 }
 
@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     const res = await authApi.login(email, password)
     setUser(res.user)
+    return res.user
   }, [])
 
   const logout = useCallback(async () => {

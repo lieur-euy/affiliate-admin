@@ -14,7 +14,12 @@ export function LoginPage() {
     setError(null)
 
     try {
-      await login(email, password)
+      const loggedInUser = await login(email, password)
+      if (loggedInUser.role === "viewer") {
+        setError("You don't have access to the admin panel")
+        setIsLoading(false)
+        return
+      }
       navigate("/")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
