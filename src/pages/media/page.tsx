@@ -81,7 +81,7 @@ function findPath(
   let current = map.get(targetId)
   while (current) {
     path.unshift(current)
-    current = (current.parent_id ?? null) ? map.get(current.parent_id) : undefined
+    current = current.parent_id ? (map.get(current.parent_id) ?? undefined) : undefined
   }
   return path
 }

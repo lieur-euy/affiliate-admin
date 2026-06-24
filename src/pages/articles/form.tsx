@@ -99,7 +99,8 @@ export function ArticleFormPage() {
 
   const getTrans = (key: string) => {
     const trans = form.translations?.[contentLang] as Record<string, string> | undefined
-    return trans?.[key] ?? (contentLang === "id" ? (form as Record<string, unknown>)[key] ?? "" : "")
+    const fallback = (form as unknown as Record<string, string>)[key] ?? ""
+    return trans?.[key] ?? (contentLang === "id" ? fallback : "")
   }
 
   const setTrans = (key: string, value: string) => {

@@ -251,8 +251,9 @@ export function ProductFormPage() {
     }))
   }, [activeCreateLang])
 
-  const allLocales = isEdit
-    ? [...new Set([pf.locale, ...localizations.map((l) => l.locale)].filter(Boolean))]
+  const activeLocale: string = isEdit ? (pf.locale ?? "id") : activeCreateLang
+  const allLocales: string[] = isEdit
+    ? [...new Set([pf.locale, ...localizations.map((l) => l.locale)].filter(Boolean))] as string[]
     : LOCALES
 
   const switchTargetId = (loc: string) => {
@@ -331,14 +332,15 @@ export function ProductFormPage() {
 
   const addLink = () => {
     if (!newLink.marketplace_id || !newLink.url) { toast.error("Select marketplace and enter URL"); return }
-    const tempId = "temp_" + Date.now()
-    setPendingLinks((prev) => [...prev, { ...newLink, tempId, product_id: id ?? "" }])
+    setAffiliateLinks((prev) => [...prev, { id: "temp_" + Date.now(), product_id: id ?? "", marketplace_id: newLink.marketplace_id, url: newLink.url, current_price: newLink.current_price, currency: newLink.currency, is_active: true, created_at: "", updated_at: "" } as AffiliateLink])
     setNewLink({ product_id: id ?? "", marketplace_id: "", url: "", currency: "IDR" })
   }
 
   const deleteLink = async (linkId: string) => {
-    if (linkId.startsWith("temp_")) { setPendingLinks((prev) => prev.filter((l) => l.tempId !== linkId)); return }
-    try { await affiliateLinkApi.delete(linkId); setAffiliateLinks((prev) => prev.filter((l) => l.id !== linkId)) } catch { toast.error("Failed to delete link") }
+    setAffiliateLinks((prev) => prev.filter((l) => l.id !== linkId))
+    if (!linkId.startsWith("temp_")) {
+      try { await affiliateLinkApi.delete(linkId) } catch { toast.error("Failed to delete link") }
+    }
   }
 
   const finalSave = async () => {
@@ -437,7 +439,7 @@ export function ProductFormPage() {
             })}
           </div>
           {(() => {
-            const existing = [pf.locale, ...localizations.map((l) => l.locale)]
+            const existing = [pf.locale ?? "", ...localizations.map((l) => l.locale)]
             const missing = LOCALES.find((l) => !existing.includes(l))
             if (!isEdit || !missing) return null
             const label = LOCALE_LABELS[missing] ?? missing
@@ -487,11 +489,11 @@ export function ProductFormPage() {
 
       {/* Tab 0: Basic info */}
       {tab === 0 && (
-        <div className="space-y-5" key={`tab0-${isEdit ? pf.locale : activeCreateLang}`}>
+        <div className="space-y-5" key={`tab0-${activeLocale}`}>
           {!isEdit && (
             <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
               <Globe className="size-3.5" />
-              <span>Editing: <strong>{LOCALE_LABELS[activeCreateLang]}</strong> — each locale has its own name & gallery</span>
+              <span>Editing: <strong>{LOCALE_LABELS[activeLocale]}</strong> — each locale has its own name & gallery</span>
             </div>
           )}
           <div className="space-y-2">
@@ -500,7 +502,7 @@ export function ProductFormPage() {
               const name = e.target.value
               if (isEdit) { markDirty(); setPf((prev) => ({ ...prev, name, slug: slugEdited.current ? prev.slug ?? "" : slugify(name) })) }
               else { markDirty(); setCreateLocales((prev) => ({ ...prev, [activeCreateLang]: { ...prev[activeCreateLang], name, slug: slugEdited.current ? prev[activeCreateLang]?.slug ?? "" : slugify(name) } })) }
-            }} placeholder={`Product name (${LOCALE_LABELS[isEdit ? pf.locale : activeCreateLang]})`} />
+            }} placeholder={`Product name (${LOCALE_LABELS[activeLocale]})`} />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Slug</label>
@@ -599,16 +601,16 @@ export function ProductFormPage() {
 
       {/* Tab 1: Description & Content */}
       {tab === 1 && (
-        <div className="space-y-5" key={`tab1-${isEdit ? pf.locale : activeCreateLang}`}>
+        <div className="space-y-5" key={`tab1-${activeLocale}`}>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Description ({LOCALE_LABELS[isEdit ? pf.locale : activeCreateLang]})</label>
+            <label className="text-sm font-medium">Description ({LOCALE_LABELS[activeLocale]})</label>
             <RichEditor value={currentPf.description ?? ""} onChange={(v) => {
               if (isEdit) { markDirty(); setPf({ ...pf, description: v }) }
               else updateCreateField("description", v)
             }} minHeight={150} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Content ({LOCALE_LABELS[isEdit ? pf.locale : activeCreateLang]})</label>
+            <label className="text-sm font-medium">Content ({LOCALE_LABELS[activeLocale]})</label>
             <RichEditor value={currentPf.content ?? ""} onChange={(v) => {
               if (isEdit) { markDirty(); setPf({ ...pf, content: v }) }
               else updateCreateField("content", v)
@@ -636,10 +638,10 @@ export function ProductFormPage() {
 
       {/* Tab 3: SEO */}
       {tab === 3 && (
-        <div className="space-y-5" key={`tab3-${isEdit ? pf.locale : activeCreateLang}`}>
+        <div className="space-y-5" key={`tab3-${activeLocale}`}>
           <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
             <Globe className="size-3.5" />
-            <span>SEO for <strong>{LOCALE_LABELS[isEdit ? pf.locale : activeCreateLang]}</strong></span>
+            <span>SEO for <strong>{LOCALE_LABELS[activeLocale]}</strong></span>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("common.meta_title")}</label>
@@ -702,7 +704,7 @@ export function ProductFormPage() {
             <>
               {affiliateLinks.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Saved Links ({LOCALE_LABELS[pf.locale]})</p>
+                  <p className="text-sm font-medium text-muted-foreground">Saved Links ({LOCALE_LABELS[activeLocale]})</p>
                   {affiliateLinks.map((link) => (
                     <div key={link.id} className="flex items-center gap-2 rounded-lg border p-3 text-sm">
                       <div className="flex-1 space-y-0.5">

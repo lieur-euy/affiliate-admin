@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-interface LoginFormProps extends React.ComponentProps<"div"> {
+interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>
   isLoading?: boolean
   error?: string | null
 }
 
-export function LoginForm({ className, onSubmit, isLoading, error, ...props }: LoginFormProps) {
+export function LoginForm({ className, onSubmit, isLoading, error, ...props }: LoginFormProps & { className?: string }) {
   const { t } = useTranslation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

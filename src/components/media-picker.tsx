@@ -80,7 +80,7 @@ export function MediaPicker({ open, onOpenChange, onSelect, onSelectMultiple, mu
   const createFolder = async () => {
     if (!newFolderName.trim()) return
     try {
-      await mediaApi.createFolder({ name: newFolderName, parent_id: currentFolderId })
+      await mediaApi.createFolder(newFolderName, currentFolderId)
       toast.success("Folder created"); setNewFolderName(""); setShowNewFolder(false); load()
     } catch { toast.error("Failed") }
   }
@@ -100,7 +100,7 @@ export function MediaPicker({ open, onOpenChange, onSelect, onSelectMultiple, mu
   if (currentFolderId) {
     const map = new Map(folders.map((f) => [f.id, f]))
     let current = map.get(currentFolderId)
-    while (current) { breadcrumb.unshift(current); current = (current.parent_id ?? null) ? map.get(current.parent_id) : undefined }
+    while (current) { breadcrumb.unshift(current); current = current.parent_id ? (map.get(current.parent_id) ?? undefined) : undefined }
   }
 
   return (

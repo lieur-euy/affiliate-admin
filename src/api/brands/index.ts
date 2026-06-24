@@ -21,7 +21,7 @@ interface CursorResp<T> {
 }
 
 export const brandApi = {
-  list(params?: { cursor?: string; limit?: number }) {
+  list(params?: { cursor?: string; limit?: number; search?: string }) {
     const q = params
       ? "?" + Object.entries(params).filter(([, v]) => v != null).map(([k, v]) => `${k}=${v}`).join("&")
       : ""

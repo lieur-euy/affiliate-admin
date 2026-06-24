@@ -151,7 +151,7 @@ export function SpecsForm({ specType, data, onChange }: SpecsFormProps) {
           <label className="text-xs font-medium text-muted-foreground">{f.label}</label>
           <Input
             type={f.type === "number" ? "number" : "text"}
-            value={data[f.key] ?? ""}
+            value={(data[f.key] as string | number) ?? ""}
             onChange={(e) => setVal(f.key, e.target.value, f.type === "number")}
             className="h-8 text-xs"
           />
