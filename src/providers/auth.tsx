@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react"
 import { authApi, type UserResponse } from "@/api/auth"
+import { setAuthToken } from "@/api/client"
 
 interface AuthState {
   user: UserResponse | null
@@ -23,22 +24,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    authApi
-      .me()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setIsLoading(false))
+    const sid = sessionStorage.getItem("session_id")
+    if (sid) {
+      setAuthToken(sid)
+      authApi
+        .me()
+        .then(setUser)
+        .catch(() => {
+          setAuthToken(null)
+          sessionStorage.removeItem("session_id")
+          setUser(null)
+        })
+        .finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
+    }
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await authApi.login(email, password)
+    setAuthToken(res.token)
+    sessionStorage.setItem("session_id", res.token)
     setUser(res.user)
     return res.user
   }, [])
 
   const logout = useCallback(async () => {
-    await authApi.logout()
-    setUser(null)
+    try {
+      await authApi.logout()
+    } finally {
+      setAuthToken(null)
+      sessionStorage.removeItem("session_id")
+      setUser(null)
+    }
   }, [])
 
   return (

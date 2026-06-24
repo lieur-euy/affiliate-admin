@@ -1,5 +1,15 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
+let authToken: string | null = null
+
+export function setAuthToken(token: string | null) {
+  authToken = token
+}
+
+export function getAuthToken(): string | null {
+  return authToken
+}
+
 export class ApiError extends Error {
   status: number
   constructor(
@@ -19,13 +29,16 @@ async function request<T>(
     ...(options.headers as Record<string, string>),
   }
 
+  if (authToken) {
+    headers["Authorization"] = `Bearer ${authToken}`
+  }
+
   if (!(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json"
   }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    credentials: "include",
     headers,
   })
 
