@@ -1,4 +1,5 @@
 import { api } from "@/api/client"
+import type { SEOReq } from "@/api/seo"
 
 export interface Product {
   id: string
@@ -64,6 +65,7 @@ export interface ProductBulkLocale {
     currency: string
   }[]
   specs?: Record<string, unknown>
+  seo?: SEOReq
 }
 
 export interface ProductBulkReq {

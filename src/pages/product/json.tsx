@@ -10,7 +10,29 @@ const EXAMPLE = `[
     "id": {
       "name": "Lenovo Legion 5 Pro 16",
       "description": "<p>Deskripsi produk bahasa Indonesia</p>",
-      "content": "<p>Konten lengkap produk</p>"
+      "content": "<p>Konten lengkap produk</p>",
+      "category_id": "uuid-kategori",
+      "brand_id": "uuid-brand",
+      "image_url": "",
+      "gallery": [],
+      "specs": {
+        "brand": "Intel",
+        "model": "Core i7-14700K",
+        "cores": 20,
+        "threads": 28,
+        "base_clock": 3.4,
+        "boost_clock": 5.6,
+        "tdp": 125,
+        "socket": "LGA1700"
+      },
+      "affiliate_links": [
+        {
+          "marketplace_id": "uuid-marketplace",
+          "url": "https://tokopedia.com/product/xxx",
+          "current_price": 15000000,
+          "currency": "IDR"
+        }
+      ]
     },
     "en": {
       "name": "Lenovo Legion 5 Pro 16",

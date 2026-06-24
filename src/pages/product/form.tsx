@@ -285,8 +285,9 @@ export function ProductFormPage() {
               currency: l.currency || "IDR",
             })),
             specs: (specs[specType] ?? {}) as Record<string, unknown>,
+            seo: sf,
           },
-          en: { name: "", description: "", content: "", specs: (specs[specType] ?? {}) as Record<string, unknown> },
+          en: { name: "", description: "", content: "", specs: (specs[specType] ?? {}) as Record<string, unknown>, seo: enSf },
         }
         const resp = await productApi.updateBulk(id!, bulk)
         return resp.id.id
@@ -311,6 +312,7 @@ export function ProductFormPage() {
         gallery: (createLocales[loc] as any).gallery ?? [],
         affiliate_links: (createLocales[loc] as any)._links ?? [],
         specs: (specs[specType] ?? {}) as Record<string, unknown>,
+        seo: createSeo[loc],
       })
       const bulk: ProductBulkReq = { id: toLocale("id"), en: toLocale("en") }
       const resp = await productApi.createBulk(bulk)
@@ -321,10 +323,6 @@ export function ProductFormPage() {
     } finally {
       setSaving(false)
     }
-  }
-
-  const saveSeoForProduct = async (productId: string, seoData: SEOReq) => {
-    try { await seoApi.upsert(productId, seoData) } catch { toast.error("Failed to save SEO") }
   }
 
   const addLink = () => {
@@ -342,18 +340,6 @@ export function ProductFormPage() {
 
   const finalSave = async () => {
     const pid = await saveProduct()
-    if (!pid) return pid
-    if (!isEdit) {
-      if (createSeo.id.meta_title) await saveSeoForProduct(pid, createSeo.id)
-      if (createSeo.en.meta_title || createLocales.en.name) {
-        const locs = await productApi.getLocalizations(pid).catch(() => [])
-        const en = (locs ?? []).find((l) => l.locale === "en")
-        if (en && createSeo.en.meta_title) await saveSeoForProduct(en.id, createSeo.en)
-      }
-    } else {
-      if (sf) await saveSeoForProduct(id!, sf)
-      if (enProductId) await saveSeoForProduct(enProductId, enSf)
-    }
     return pid
   }
 
@@ -373,10 +359,6 @@ export function ProductFormPage() {
       }
       setTab((t) => Math.min(t + 1, tabs.length - 1))
       return
-    }
-    if (tab === 3 && id) {
-      await saveSeoForProduct(id!, sf)
-      if (enProductId) await saveSeoForProduct(enProductId, enSf)
     }
     setTab((t) => Math.min(t + 1, tabs.length - 1))
   }

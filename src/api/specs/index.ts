@@ -147,15 +147,25 @@ export interface ProductSpecs {
   hdd?: SpecHDD | null
 }
 
+interface SpecResponse {
+  spec_type: string
+  data: Record<string, unknown> | null
+}
+
 export const specApi = {
-  getByProductId(productId: string) {
-    return api.request<ProductSpecs>(`/products/${productId}/specs`)
+  async getByProductId(productId: string): Promise<ProductSpecs> {
+    const res = await api.request<SpecResponse>(`/products/${productId}/specs`)
+    if (!res || !res.spec_type || !res.data) return {}
+    return { [res.spec_type]: res.data }
   },
 
   upsert(productId: string, data: ProductSpecs) {
+    const keys = Object.keys(data) as (keyof ProductSpecs)[]
+    const specType = keys[0]
+    const body = specType && data[specType] ? data[specType] : data
     return api.request<ProductSpecs>(`/products/${productId}/specs`, {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: JSON.stringify(body),
     })
   },
 }
