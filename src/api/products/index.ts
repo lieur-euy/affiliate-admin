@@ -63,6 +63,7 @@ export interface ProductBulkLocale {
     current_price?: number | null
     currency: string
   }[]
+  specs?: Record<string, unknown>
 }
 
 export interface ProductBulkReq {

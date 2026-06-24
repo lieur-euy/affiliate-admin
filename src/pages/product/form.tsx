@@ -284,8 +284,9 @@ export function ProductFormPage() {
               current_price: l.current_price,
               currency: l.currency || "IDR",
             })),
+            specs: (specs[specType] ?? {}) as Record<string, unknown>,
           },
-          en: { name: "", description: "", content: "" },
+          en: { name: "", description: "", content: "", specs: (specs[specType] ?? {}) as Record<string, unknown> },
         }
         const resp = await productApi.updateBulk(id!, bulk)
         return resp.id.id
@@ -309,6 +310,7 @@ export function ProductFormPage() {
         is_featured: createLocales[loc].is_featured,
         gallery: (createLocales[loc] as any).gallery ?? [],
         affiliate_links: (createLocales[loc] as any)._links ?? [],
+        specs: (specs[specType] ?? {}) as Record<string, unknown>,
       })
       const bulk: ProductBulkReq = { id: toLocale("id"), en: toLocale("en") }
       const resp = await productApi.createBulk(bulk)
@@ -323,11 +325,6 @@ export function ProductFormPage() {
 
   const saveSeoForProduct = async (productId: string, seoData: SEOReq) => {
     try { await seoApi.upsert(productId, seoData) } catch { toast.error("Failed to save SEO") }
-  }
-
-  const saveSpecs = async () => {
-    if (!id) return
-    try { await specApi.upsert(id, specs) } catch { toast.error("Failed to save specs") }
   }
 
   const addLink = () => {
@@ -353,11 +350,9 @@ export function ProductFormPage() {
         const en = (locs ?? []).find((l) => l.locale === "en")
         if (en && createSeo.en.meta_title) await saveSeoForProduct(en.id, createSeo.en)
       }
-      if (specs[specType]) await specApi.upsert(pid, specs).catch(() => {})
     } else {
       if (sf) await saveSeoForProduct(id!, sf)
       if (enProductId) await saveSeoForProduct(enProductId, enSf)
-      await saveSpecs()
     }
     return pid
   }
@@ -379,7 +374,6 @@ export function ProductFormPage() {
       setTab((t) => Math.min(t + 1, tabs.length - 1))
       return
     }
-    if (tab === 2 && id) await saveSpecs()
     if (tab === 3 && id) {
       await saveSeoForProduct(id!, sf)
       if (enProductId) await saveSeoForProduct(enProductId, enSf)
