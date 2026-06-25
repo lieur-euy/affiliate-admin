@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input"
 
-export type SpecType = "cpu" | "gpu" | "ram" | "ssd" | "hdd"
+export type SpecType = "cpu" | "vga" | "ram" | "ssd" | "hdd"
 
 interface SpecField {
   key: string
