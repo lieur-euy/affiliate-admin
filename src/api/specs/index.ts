@@ -27,7 +27,7 @@ export interface SpecCPU {
   launch_price?: number | null
 }
 
-export interface SpecGPU {
+export interface SpecVGA {
   brand?: string | null
   model?: string | null
   chipset?: string | null
@@ -85,6 +85,7 @@ export interface SpecRAM {
   xmp_support?: boolean | null
   dual_rank?: boolean | null
   release_date?: string | null
+  launch_price?: number | null
 }
 
 export interface SpecSSD {
@@ -137,14 +138,158 @@ export interface SpecHDD {
   encryption?: string | null
   release_date?: string | null
   warranty?: number | null
+  launch_price?: number | null
+}
+
+export interface SpecPSU {
+  brand?: string | null
+  model?: string | null
+  wattage?: number | null
+  certification?: string | null
+  modular_type?: string | null
+  form_factor?: string | null
+  fan_size?: number | null
+  pcie_6_2pin?: number | null
+  sata_connectors?: number | null
+  cpu_connector?: string | null
+  mb_connector?: string | null
+  protection?: string | null
+  rgb?: boolean | null
+  fanless_mode?: boolean | null
+  efficiency_rating?: string | null
+  pfc_type?: string | null
+  dimensions?: string | null
+  weight?: number | null
+  warranty?: number | null
+  release_date?: string | null
+  launch_price?: number | null
+}
+
+export interface SpecMotherboard {
+  brand?: string | null
+  model?: string | null
+  socket?: string | null
+  chipset?: string | null
+  form_factor?: string | null
+  memory_type?: string | null
+  memory_slots?: number | null
+  max_memory?: number | null
+  memory_speed?: string | null
+  pcie_slots?: string | null
+  m2_slots?: number | null
+  sata_ports?: number | null
+  lan?: string | null
+  wifi?: string | null
+  bluetooth?: string | null
+  audio_chipset?: string | null
+  usb_ports?: string | null
+  video_outputs?: string | null
+  ram_channel?: string | null
+  bios_type?: string | null
+  sli_crossfire?: boolean | null
+  rgb?: boolean | null
+  pcie_version?: string | null
+  warranty?: number | null
+  release_date?: string | null
+  launch_price?: number | null
+}
+
+export interface SpecCooler {
+  brand?: string | null
+  model?: string | null
+  cooler_type?: string | null
+  radiator_size?: number | null
+  fan_size?: number | null
+  fan_count?: number | null
+  max_fan_speed?: number | null
+  max_airflow?: string | null
+  max_noise?: string | null
+  tdp?: number | null
+  height?: number | null
+  socket_compatibility?: string | null
+  material?: string | null
+  heat_pipes?: number | null
+  rgb?: boolean | null
+  pump_speed?: string | null
+  dimensions?: string | null
+  weight?: number | null
+  warranty?: number | null
+  release_date?: string | null
+  launch_price?: number | null
+}
+
+export interface SpecCasing {
+  brand?: string | null
+  model?: string | null
+  type?: string | null
+  motherboard_support?: string | null
+  material?: string | null
+  side_panel?: string | null
+  drive_bays_35?: number | null
+  drive_bays_25?: number | null
+  expansion_slots?: number | null
+  max_gpu_length?: number | null
+  max_cpu_cooler_height?: number | null
+  max_psu_length?: number | null
+  fan_slots?: string | null
+  included_fans?: string | null
+  radiator_support?: string | null
+  front_io?: string | null
+  psu_shroud?: boolean | null
+  dust_filters?: boolean | null
+  cable_management?: boolean | null
+  dimensions?: string | null
+  weight?: number | null
+  rgb?: boolean | null
+  warranty?: number | null
+  release_date?: string | null
+  launch_price?: number | null
+}
+
+export interface SpecMonitor {
+  brand?: string | null
+  model?: string | null
+  screen_size?: number | null
+  resolution?: string | null
+  panel_type?: string | null
+  refresh_rate?: number | null
+  response_time?: number | null
+  aspect_ratio?: string | null
+  brightness?: number | null
+  contrast_ratio?: string | null
+  hdr?: string | null
+  color_gamut?: string | null
+  color_depth?: string | null
+  viewing_angle?: string | null
+  adaptive_sync?: string | null
+  curvature?: string | null
+  built_in_speakers?: boolean | null
+  vesa_mount?: string | null
+  connectivity?: string | null
+  usb_hub?: boolean | null
+  power_consumption?: number | null
+  height_adjustable?: boolean | null
+  swivel?: boolean | null
+  tilt?: boolean | null
+  pivot?: boolean | null
+  dimensions?: string | null
+  weight?: number | null
+  warranty?: number | null
+  release_date?: string | null
+  launch_price?: number | null
 }
 
 export interface ProductSpecs {
   cpu?: SpecCPU | null
-  gpu?: SpecGPU | null
+  vga?: SpecVGA | null
   ram?: SpecRAM | null
   ssd?: SpecSSD | null
   hdd?: SpecHDD | null
+  psu?: SpecPSU | null
+  motherboard?: SpecMotherboard | null
+  cooler?: SpecCooler | null
+  casing?: SpecCasing | null
+  monitor?: SpecMonitor | null
 }
 
 interface SpecResponse {

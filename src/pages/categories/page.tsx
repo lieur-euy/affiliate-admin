@@ -238,10 +238,15 @@ export function CategoriesPage() {
               >
                 <option value="">None</option>
                 <option value="cpu">CPU</option>
-                <option value="gpu">GPU</option>
+                <option value="vga">VGA</option>
                 <option value="ram">RAM</option>
                 <option value="ssd">SSD</option>
                 <option value="hdd">HDD</option>
+                <option value="psu">PSU</option>
+                <option value="motherboard">Motherboard</option>
+                <option value="cooler">CPU Cooler</option>
+                <option value="casing">Casing</option>
+                <option value="monitor">Monitor</option>
               </select>
             </div>
             <div className="flex justify-end gap-2">

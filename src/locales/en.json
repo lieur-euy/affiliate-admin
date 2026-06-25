@@ -113,9 +113,15 @@
   },
   "spec": {
     "cpu": "CPU Specifications",
-    "gpu": "GPU Specifications",
+    "vga": "VGA Specifications",
     "ram": "RAM Specifications",
-    "ssd": "SSD Specifications"
+    "ssd": "SSD Specifications",
+    "hdd": "HDD Specifications",
+    "psu": "PSU Specifications",
+    "motherboard": "Motherboard Specifications",
+    "cooler": "CPU Cooler Specifications",
+    "casing": "Casing Specifications",
+    "monitor": "Monitor Specifications"
   },
   "validation": {
     "required": "This field is required",

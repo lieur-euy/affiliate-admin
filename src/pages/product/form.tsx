@@ -39,7 +39,7 @@ const tabs = ["product.title", "common.details", "product.specs", "product.seo",
 
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
 
-const SPEC_LABELS: Record<SpecType, string> = { cpu: "CPU", vga: "VGA", ram: "RAM", ssd: "SSD", hdd: "HDD" }
+const SPEC_LABELS: Record<SpecType, string> = { cpu: "CPU", vga: "VGA", ram: "RAM", ssd: "SSD", hdd: "HDD", psu: "PSU", motherboard: "Motherboard", cooler: "CPU Cooler", casing: "Casing", monitor: "Monitor" }
 const LOCALE_LABELS: Record<string, string> = { id: "Indonesia", en: "English" }
 const LOCALES = ["id", "en"]
 

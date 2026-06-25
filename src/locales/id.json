@@ -113,9 +113,15 @@
   },
   "spec": {
     "cpu": "Spesifikasi CPU",
-    "gpu": "Spesifikasi GPU",
+    "vga": "Spesifikasi VGA",
     "ram": "Spesifikasi RAM",
-    "ssd": "Spesifikasi SSD"
+    "ssd": "Spesifikasi SSD",
+    "hdd": "Spesifikasi HDD",
+    "psu": "Spesifikasi PSU",
+    "motherboard": "Spesifikasi Motherboard",
+    "cooler": "Spesifikasi CPU Cooler",
+    "casing": "Spesifikasi Casing",
+    "monitor": "Spesifikasi Monitor"
   },
   "validation": {
     "required": "Bidang ini wajib diisi",
