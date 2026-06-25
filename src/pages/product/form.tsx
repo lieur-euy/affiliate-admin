@@ -472,12 +472,12 @@ export function ProductFormPage() {
         </div>
       </div>
 
-      {/* Tab bar */}
+      {/* Tab bar — all tabs clickable */}
       <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1 text-sm">
         {tabs.map((label, i) => (
           <button key={label} onClick={() => setTab(i)}
-            className={`flex-1 rounded-md px-3 py-2 text-center text-xs font-medium transition-colors ${
-              i === tab ? "bg-background text-foreground shadow-sm" : i < tab ? "text-primary cursor-pointer" : "text-muted-foreground cursor-default"
+            className={`flex-1 rounded-md px-3 py-2 text-center text-xs font-medium transition-colors cursor-pointer ${
+              i === tab ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-background/50"
             }`}>
             {t(label)}
           </button>
@@ -751,11 +751,17 @@ export function ProductFormPage() {
           <ChevronLeft className="mr-1 size-4" /> Previous
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSave}><Save className="mr-1 size-4" /> Save</Button>
+          <Button variant="outline" onClick={handleSave} disabled={saving}>
+            <Save className="mr-1 size-4" /> {isEdit ? "Update" : "Save"}
+          </Button>
           {tab < tabs.length - 1 ? (
-            <Button onClick={handleSaveAndNext} disabled={saving}>Save & Next <ChevronRight className="ml-1 size-4" /></Button>
+            <Button onClick={handleSaveAndNext} disabled={saving}>
+              {isEdit ? "Next" : "Save & Next"} <ChevronRight className="ml-1 size-4" />
+            </Button>
           ) : (
-            <Button onClick={handleSave} disabled={saving}><Save className="mr-1 size-4" /> {isEdit ? "Update" : "Create"} Product</Button>
+            <Button onClick={handleSave} disabled={saving}>
+              <Save className="mr-1 size-4" /> {isEdit ? "Update Product" : "Create Product"}
+            </Button>
           )}
         </div>
       </div>
