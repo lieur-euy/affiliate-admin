@@ -115,6 +115,7 @@ export function ProductFormPage() {
   const [linksLoaded, setLinksLoaded] = useState(false)
   const [newLink, setNewLink] = useState<AffiliateLinkReq>({ product_id: "", marketplace_id: "", url: "", currency: "IDR" })
   const [saving, setSaving] = useState(false)
+  const [savingSeo, setSavingSeo] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [mediaPickerTarget, setMediaPickerTarget] = useState<"featured" | "gallery">("featured")
@@ -270,22 +271,29 @@ export function ProductFormPage() {
     setConfirmLeave(`/products/${targetId}/edit`)
   }
 
+  const saveSeo = async () => {
+    if (!isEdit || !id) return
+    const hasSeo = sf.meta_title || sf.meta_description || sf.meta_keywords ||
+                   sf.og_title || sf.og_description || sf.og_image ||
+                   sf.canonical_url || sf.robots
+    if (!hasSeo && !(enProductId && (enSf.meta_title || enSf.meta_description || enSf.meta_keywords))) return
+    setSavingSeo(true)
+    try {
+      if (hasSeo) await seoApi.upsert(id, sf)
+      if (enProductId && (enSf.meta_title || enSf.meta_description || enSf.meta_keywords ||
+          enSf.og_title || enSf.og_description || enSf.og_image ||
+          enSf.canonical_url || enSf.robots)) {
+        await seoApi.upsert(enProductId, enSf)
+      }
+    } catch { /* non-critical */ }
+    finally { setSavingSeo(false) }
+  }
+
   const saveProduct = async (): Promise<string | null> => {
     setSaving(true)
     try {
       if (isEdit) {
-        // Save SEO independently via dedicated endpoint (ensures reliability)
-        const hasSeo = sf.meta_title || sf.meta_description || sf.meta_keywords ||
-                       sf.og_title || sf.og_description || sf.og_image ||
-                       sf.canonical_url || sf.robots
-        if (hasSeo) {
-          await seoApi.upsert(id!, sf)
-        }
-        if (enProductId && (enSf.meta_title || enSf.meta_description || enSf.meta_keywords ||
-            enSf.og_title || enSf.og_description || enSf.og_image ||
-            enSf.canonical_url || enSf.robots)) {
-          await seoApi.upsert(enProductId, enSf)
-        }
+        await saveSeo()
 
         const idData: ProductBulkLocale = {
           name: pf.name, slug: pf.slug ?? "",
@@ -381,6 +389,7 @@ export function ProductFormPage() {
       setTab((t) => Math.min(t + 1, tabs.length - 1))
       return
     }
+    if (tab === 3) await saveSeo()
     setTab((t) => Math.min(t + 1, tabs.length - 1))
   }
 
@@ -475,7 +484,10 @@ export function ProductFormPage() {
       {/* Tab bar — all tabs clickable */}
       <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1 text-sm">
         {tabs.map((label, i) => (
-          <button key={label} onClick={() => setTab(i)}
+          <button key={label} onClick={async () => {
+            if (isEdit && tab === 3 && i !== 3) await saveSeo()
+            setTab(i)
+          }}
             className={`flex-1 rounded-md px-3 py-2 text-center text-xs font-medium transition-colors cursor-pointer ${
               i === tab ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-background/50"
             }`}>
@@ -751,7 +763,7 @@ export function ProductFormPage() {
           <ChevronLeft className="mr-1 size-4" /> Previous
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSave} disabled={saving}>
+          <Button variant="outline" onClick={handleSave} disabled={saving || savingSeo}>
             <Save className="mr-1 size-4" /> {isEdit ? "Update" : "Save"}
           </Button>
           {tab < tabs.length - 1 ? (
@@ -759,8 +771,8 @@ export function ProductFormPage() {
               {isEdit ? "Next" : "Save & Next"} <ChevronRight className="ml-1 size-4" />
             </Button>
           ) : (
-            <Button onClick={handleSave} disabled={saving}>
-              <Save className="mr-1 size-4" /> {isEdit ? "Update Product" : "Create Product"}
+            <Button onClick={handleSave} disabled={saving || savingSeo}>
+              {savingSeo ? "Saving SEO..." : saving ? "Saving..." : (isEdit ? "Update Product" : "Create Product")}
             </Button>
           )}
         </div>
