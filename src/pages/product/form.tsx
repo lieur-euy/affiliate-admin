@@ -168,6 +168,7 @@ export function ProductFormPage() {
     }).catch(() => navigate("/products", { replace: true }))
 
     seoApi.getByProductId(id).then((s) => {
+      if (!s) { setSf({ ...emptySeo }); return }
       setSf({ ...emptySeo,
         meta_title: s.meta_title || "", meta_description: s.meta_description || "",
         meta_keywords: s.meta_keywords || "", og_title: s.og_title || "",
@@ -184,6 +185,7 @@ export function ProductFormPage() {
   useEffect(() => {
     if (!enProductId) return
     seoApi.getByProductId(enProductId).then((s) => {
+      if (!s) { setEnSf({ ...emptySeo }); return }
       setEnSf({ ...emptySeo,
         meta_title: s.meta_title || "", meta_description: s.meta_description || "",
         meta_keywords: s.meta_keywords || "", og_title: s.og_title || "",
@@ -271,6 +273,13 @@ export function ProductFormPage() {
     setSaving(true)
     try {
       if (isEdit) {
+        const enData: ProductBulkLocale = {
+          name: "", description: "", content: "",
+          specs: (specs[specType] ?? {}) as Record<string, unknown>,
+        }
+        if (enSf.meta_title || enSf.meta_description || enSf.meta_keywords) {
+          enData.seo = enSf
+        }
         const bulk: ProductBulkReq = {
           id: {
             name: pf.name, slug: pf.slug ?? "",
@@ -287,7 +296,7 @@ export function ProductFormPage() {
             specs: (specs[specType] ?? {}) as Record<string, unknown>,
             seo: sf,
           },
-          en: { name: "", description: "", content: "", specs: (specs[specType] ?? {}) as Record<string, unknown>, seo: enSf },
+          en: enData,
         }
         const resp = await productApi.updateBulk(id!, bulk)
         return resp.id.id
@@ -373,7 +382,7 @@ export function ProductFormPage() {
   }
 
   const currentPf = isEdit ? pf : createLocales[activeCreateLang] ?? emptyProduct
-  const currentSeo = isEdit ? (pf.locale === "en" ? enSf : sf) : createSeo[activeCreateLang] ?? emptySeo
+  const currentSeo = isEdit ? sf : createSeo[activeCreateLang] ?? emptySeo
   const currentGallery = (isEdit ? (pf as any).gallery : (createLocales[activeCreateLang] as any).gallery) ?? []
 
   // ============ RENDER ============
