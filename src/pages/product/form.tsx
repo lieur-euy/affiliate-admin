@@ -274,13 +274,19 @@ export function ProductFormPage() {
     setSaving(true)
     try {
       if (isEdit) {
-        const enData: ProductBulkLocale = {
-          name: "", description: "", content: "",
-          specs: (specs[specType] ?? {}) as Record<string, unknown>,
+        // Save SEO independently via dedicated endpoint (ensures reliability)
+        const hasSeo = sf.meta_title || sf.meta_description || sf.meta_keywords ||
+                       sf.og_title || sf.og_description || sf.og_image ||
+                       sf.canonical_url || sf.robots
+        if (hasSeo) {
+          await seoApi.upsert(id!, sf)
         }
-        if (enSf.meta_title || enSf.meta_description || enSf.meta_keywords) {
-          enData.seo = enSf
+        if (enProductId && (enSf.meta_title || enSf.meta_description || enSf.meta_keywords ||
+            enSf.og_title || enSf.og_description || enSf.og_image ||
+            enSf.canonical_url || enSf.robots)) {
+          await seoApi.upsert(enProductId, enSf)
         }
+
         const idData: ProductBulkLocale = {
           name: pf.name, slug: pf.slug ?? "",
           description: pf.description ?? "", content: pf.content ?? "",
@@ -288,7 +294,6 @@ export function ProductFormPage() {
           image_url: pf.image_url, is_active: pf.is_active, is_featured: pf.is_featured,
           gallery: (pf as any).gallery ?? [],
           specs: (specs[specType] ?? {}) as Record<string, unknown>,
-          seo: sf,
         }
         if (linksLoaded && affiliateLinks.length > 0) {
           idData.affiliate_links = affiliateLinks.map((l) => ({
@@ -297,6 +302,10 @@ export function ProductFormPage() {
             current_price: l.current_price,
             currency: l.currency || "IDR",
           }))
+        }
+        const enData: ProductBulkLocale = {
+          name: "", description: "", content: "",
+          specs: (specs[specType] ?? {}) as Record<string, unknown>,
         }
         const bulk: ProductBulkReq = { id: idData, en: enData }
         const resp = await productApi.updateBulk(id!, bulk)
