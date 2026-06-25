@@ -112,6 +112,7 @@ export function ProductFormPage() {
   const [specs, setSpecs] = useState<ProductSpecs>({})
   const [specType, setSpecType] = useState<SpecType>("cpu")
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([])
+  const [linksLoaded, setLinksLoaded] = useState(false)
   const [newLink, setNewLink] = useState<AffiliateLinkReq>({ product_id: "", marketplace_id: "", url: "", currency: "IDR" })
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
@@ -177,7 +178,7 @@ export function ProductFormPage() {
       })
     }).catch(() => setSf({ ...emptySeo }))
 
-    affiliateLinkApi.listByProduct(id).then((links) => setAffiliateLinks(links ?? [])).catch(() => {})
+    affiliateLinkApi.listByProduct(id).then((links) => { setAffiliateLinks(links ?? []); setLinksLoaded(true) }).catch(() => {})
     specApi.getByProductId(id).then((s) => { if (s) setSpecs(s) }).catch(() => {})
   }, [id, navigate])
 
@@ -280,24 +281,24 @@ export function ProductFormPage() {
         if (enSf.meta_title || enSf.meta_description || enSf.meta_keywords) {
           enData.seo = enSf
         }
-        const bulk: ProductBulkReq = {
-          id: {
-            name: pf.name, slug: pf.slug ?? "",
-            description: pf.description ?? "", content: pf.content ?? "",
-            category_id: pf.category_id, brand_id: pf.brand_id,
-            image_url: pf.image_url, is_active: pf.is_active, is_featured: pf.is_featured,
-            gallery: (pf as any).gallery ?? [],
-            affiliate_links: affiliateLinks.map((l) => ({
-              marketplace_id: l.marketplace_id,
-              url: l.url,
-              current_price: l.current_price,
-              currency: l.currency || "IDR",
-            })),
-            specs: (specs[specType] ?? {}) as Record<string, unknown>,
-            seo: sf,
-          },
-          en: enData,
+        const idData: ProductBulkLocale = {
+          name: pf.name, slug: pf.slug ?? "",
+          description: pf.description ?? "", content: pf.content ?? "",
+          category_id: pf.category_id, brand_id: pf.brand_id,
+          image_url: pf.image_url, is_active: pf.is_active, is_featured: pf.is_featured,
+          gallery: (pf as any).gallery ?? [],
+          specs: (specs[specType] ?? {}) as Record<string, unknown>,
+          seo: sf,
         }
+        if (linksLoaded && affiliateLinks.length > 0) {
+          idData.affiliate_links = affiliateLinks.map((l) => ({
+            marketplace_id: l.marketplace_id,
+            url: l.url,
+            current_price: l.current_price,
+            currency: l.currency || "IDR",
+          }))
+        }
+        const bulk: ProductBulkReq = { id: idData, en: enData }
         const resp = await productApi.updateBulk(id!, bulk)
         return resp.id.id
       }
@@ -336,11 +337,13 @@ export function ProductFormPage() {
 
   const addLink = () => {
     if (!newLink.marketplace_id || !newLink.url) { toast.error("Select marketplace and enter URL"); return }
+    markDirty()
     setAffiliateLinks((prev) => [...prev, { id: "temp_" + Date.now(), product_id: id ?? "", marketplace_id: newLink.marketplace_id, url: newLink.url, current_price: newLink.current_price, currency: newLink.currency, is_active: true, created_at: "", updated_at: "" } as AffiliateLink])
     setNewLink({ product_id: id ?? "", marketplace_id: "", url: "", currency: "IDR" })
   }
 
   const deleteLink = async (linkId: string) => {
+    markDirty()
     setAffiliateLinks((prev) => prev.filter((l) => l.id !== linkId))
     if (!linkId.startsWith("temp_")) {
       try { await affiliateLinkApi.delete(linkId) } catch { toast.error("Failed to delete link") }
@@ -568,6 +571,7 @@ export function ProductFormPage() {
           <div className="flex items-center gap-6">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={currentPf.is_active ?? false} onChange={(e) => {
+                markDirty()
                 if (isEdit) setPf({ ...pf, is_active: e.target.checked })
                 else updateCreateField("is_active", e.target.checked)
               }} className="size-4" />
@@ -575,6 +579,7 @@ export function ProductFormPage() {
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={currentPf.is_featured ?? false} onChange={(e) => {
+                markDirty()
                 if (isEdit) setPf({ ...pf, is_featured: e.target.checked })
                 else updateCreateField("is_featured", e.target.checked)
               }} className="size-4" />
@@ -631,21 +636,21 @@ export function ProductFormPage() {
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("common.meta_title")}</label>
             <Input value={currentSeo.meta_title} onChange={(e) => {
-              if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, meta_title: e.target.value }); else setSf({ ...sf, meta_title: e.target.value }) }
+              if (isEdit) { markDirty(); setSf({ ...sf, meta_title: e.target.value }) }
               else updateCreateSeo("meta_title", e.target.value)
             }} />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("common.meta_description")}</label>
             <Textarea value={currentSeo.meta_description} onChange={(e) => {
-              if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, meta_description: e.target.value }); else setSf({ ...sf, meta_description: e.target.value }) }
+              if (isEdit) { markDirty(); setSf({ ...sf, meta_description: e.target.value }) }
               else updateCreateSeo("meta_description", e.target.value)
             }} rows={3} />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">{t("common.meta_keywords")}</label>
             <Input value={currentSeo.meta_keywords} onChange={(e) => {
-              if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, meta_keywords: e.target.value }); else setSf({ ...sf, meta_keywords: e.target.value }) }
+              if (isEdit) { markDirty(); setSf({ ...sf, meta_keywords: e.target.value }) }
               else updateCreateSeo("meta_keywords", e.target.value)
             }} placeholder="keyword1, keyword2" />
           </div>
@@ -654,27 +659,27 @@ export function ProductFormPage() {
             <div className="mt-4 space-y-4">
               <div className="space-y-2"><label className="text-sm font-medium">OG Title</label>
                 <Input value={currentSeo.og_title} onChange={(e) => {
-                  if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, og_title: e.target.value }); else setSf({ ...sf, og_title: e.target.value }) }
+                  if (isEdit) { markDirty(); setSf({ ...sf, og_title: e.target.value }) }
                   else updateCreateSeo("og_title", e.target.value)
                 }} /></div>
               <div className="space-y-2"><label className="text-sm font-medium">OG Description</label>
                 <Textarea value={currentSeo.og_description} onChange={(e) => {
-                  if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, og_description: e.target.value }); else setSf({ ...sf, og_description: e.target.value }) }
+                  if (isEdit) { markDirty(); setSf({ ...sf, og_description: e.target.value }) }
                   else updateCreateSeo("og_description", e.target.value)
                 }} rows={2} /></div>
               <div className="space-y-2"><label className="text-sm font-medium">OG Image URL</label>
                 <Input value={currentSeo.og_image} onChange={(e) => {
-                  if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, og_image: e.target.value }); else setSf({ ...sf, og_image: e.target.value }) }
+                  if (isEdit) { markDirty(); setSf({ ...sf, og_image: e.target.value }) }
                   else updateCreateSeo("og_image", e.target.value)
                 }} /></div>
               <div className="space-y-2"><label className="text-sm font-medium">Canonical URL</label>
                 <Input value={currentSeo.canonical_url} onChange={(e) => {
-                  if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, canonical_url: e.target.value }); else setSf({ ...sf, canonical_url: e.target.value }) }
+                  if (isEdit) { markDirty(); setSf({ ...sf, canonical_url: e.target.value }) }
                   else updateCreateSeo("canonical_url", e.target.value)
                 }} /></div>
               <div className="space-y-2"><label className="text-sm font-medium">Robots</label>
                 <Input value={currentSeo.robots} onChange={(e) => {
-                  if (isEdit) { if (pf.locale === "en") setEnSf({ ...enSf, robots: e.target.value }); else setSf({ ...sf, robots: e.target.value }) }
+                  if (isEdit) { markDirty(); setSf({ ...sf, robots: e.target.value }) }
                   else updateCreateSeo("robots", e.target.value)
                 }} placeholder="index, follow" /></div>
             </div>
