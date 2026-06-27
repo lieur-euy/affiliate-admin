@@ -23,6 +23,7 @@ const BrandsPage = lazyLoad(() => import("@/pages/brands/page"), "BrandsPage")
 const MarketplacesPage = lazyLoad(() => import("@/pages/marketplaces/page"), "MarketplacesPage")
 const OAuthPage = lazyLoad(() => import("@/pages/oauth/page"), "OAuthPage")
 const CommentsPage = lazyLoad(() => import("@/pages/comments/page"), "CommentsPage")
+const PageViewsPage = lazyLoad(() => import("@/pages/page-views/page"), "PageViewsPage")
 
 const L = ({ children }: { children: React.ReactNode }) => <Suspense fallback={<div className="flex items-center justify-center py-20 text-muted-foreground">Loading...</div>}>{children}</Suspense>
 
@@ -47,8 +48,9 @@ export function App() {
             <Route path="/media" element={<L><MediaPage /></L>} />
             <Route path="/articles/categories" element={<L><RoleGuard roles={["admin", "editor"]}><ArticleCategoriesPage /></RoleGuard></L>} />
             <Route path="/articles/tags" element={<L><RoleGuard roles={["admin", "editor"]}><ArticleTagsPage /></RoleGuard></L>} />
-            <Route path="/comments" element={<L><RoleGuard roles={["admin", "editor"]}><CommentsPage /></RoleGuard></L>} />
-            <Route path="/oauth" element={<L><RoleGuard roles={["admin"]}><OAuthPage /></RoleGuard></L>} />
+              <Route path="/comments" element={<L><RoleGuard roles={["admin", "editor"]}><CommentsPage /></RoleGuard></L>} />
+              <Route path="/page-views" element={<L><RoleGuard roles={["admin", "editor"]}><PageViewsPage /></RoleGuard></L>} />
+              <Route path="/oauth" element={<L><RoleGuard roles={["admin"]}><OAuthPage /></RoleGuard></L>} />
           </Route>
         </Route>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

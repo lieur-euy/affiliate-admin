@@ -13,8 +13,17 @@ export interface Stats {
   pending_comments: number
 }
 
+export interface PageViewCount {
+  slug: string
+  view_count: number
+  last_view: string
+}
+
 export const statsApi = {
   get() {
     return api.request<Stats>("/stats")
+  },
+  getPageViews() {
+    return api.request<PageViewCount[]>("/stats/page-views")
   },
 }

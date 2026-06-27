@@ -13,7 +13,7 @@ import {
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import { useAuth } from "@/providers/auth"
-import { LayoutDashboard, Package, BookOpen, Database, Image, MessageSquareText } from "lucide-react"
+import { LayoutDashboard, Package, BookOpen, Database, Image, MessageSquareText, Eye } from "lucide-react"
 import { Link } from "react-router-dom"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -66,6 +66,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain label="Comments" items={[
           { title: "Comments", url: "/comments", icon: <MessageSquareText /> },
         ]} />
+        {canManage && (
+          <NavMain label="Analytics" items={[
+            { title: "Page Views", url: "/page-views", icon: <Eye /> },
+          ]} />
+        )}
         {canManage && (
           <NavMain label={t("nav.oauth")} items={[
             { title: t("nav.oauth"), url: "/oauth", icon: <Database /> },
