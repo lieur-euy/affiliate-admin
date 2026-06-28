@@ -37,7 +37,8 @@ const CPU_FIELDS: SpecField[] = [
 ]
 
 const VGA_FIELDS: SpecField[] = [
-  { key: "brand", label: "Brand" },
+  { key: "brand", label: "Brand (NVIDIA/AMD)" },
+  { key: "vendor", label: "Vendor (ASUS/MSI/Gigabyte...)" },
   { key: "model", label: "Model" },
   { key: "chipset", label: "Chipset" },
   { key: "architecture", label: "Architecture" },
