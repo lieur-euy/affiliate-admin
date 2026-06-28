@@ -85,9 +85,9 @@ interface CursorResp<T> {
 }
 
 export const productApi = {
-  list(params?: { cursor?: string; limit?: number; search?: string; category_id?: string; brand_id?: string; locale?: string }) {
+  list(params?: { cursor?: string; limit?: number; search?: string; category_id?: string; brand_id?: string; locale?: string; status?: string }) {
     const q = params
-      ? "?" + Object.entries(params).filter(([, v]) => v != null).map(([k, v]) => `${k}=${v}`).join("&")
+      ? "?" + Object.entries(params).filter(([, v]) => v != null && v !== "").map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&")
       : ""
     return api.request<CursorResp<Product>>("/products" + q)
   },

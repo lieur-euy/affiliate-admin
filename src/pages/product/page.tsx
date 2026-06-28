@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useAuth } from "@/providers/auth"
@@ -17,8 +17,14 @@ import { useCursorPagination } from "@/hooks/use-cursor-pagination"
 import { toast } from "sonner"
 import { categoryApi, type Category } from "@/api/categories"
 import { brandApi, type Brand } from "@/api/brands"
-import { Plus, Pencil, Trash2, Package, ToggleLeft, ToggleRight, Loader2, FileJson } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Plus, Pencil, Trash2, Package, ToggleLeft, ToggleRight,
+  Loader2, FileJson, ArrowUpDown, CheckSquare, Square,
+} from "lucide-react"
 import { SearchableSelect } from "@/components/searchable-select"
+
+type SortKey = "name" | "created_at"
 
 export function ProductPage() {
   const { t } = useTranslation()
@@ -28,6 +34,11 @@ export function ProductPage() {
   const [filterCat, setFilterCat] = useState("")
   const [filterBrand, setFilterBrand] = useState("")
   const [filterLocale, setFilterLocale] = useState("")
+  const [filterStatus, setFilterStatus] = useState("")
+  const [sortKey, setSortKey] = useState<SortKey>("created_at")
+  const [sortAsc, setSortAsc] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [brands, setBrands] = useState<Brand[]>([])
   useEffect(() => {
@@ -42,20 +53,66 @@ export function ProductPage() {
 
   const fetcher = useCallback(
     (cursor?: string) => productApi.list({
-      limit: 12, cursor,
+      limit: 20, cursor,
       search: search || undefined,
       category_id: filterCat || undefined,
       brand_id: filterBrand || undefined,
       locale: filterLocale || undefined,
-    }).then((r) => ({ data: r.data, cursor: r.cursor })),
-    [search, filterCat, filterBrand, filterLocale],
+      status: filterStatus || undefined,
+    } as any).then((r) => ({ data: r.data, cursor: r.cursor })),
+    [search, filterCat, filterBrand, filterLocale, filterStatus],
   )
   const {
-    items, isLoading, loadError,
+    items: rawItems, isLoading, loadError,
     hasNext, hasPrev, page, totalPages,
     loadFirst, loadNext, loadPrev,
-  } = useCursorPagination<Product>(fetcher, [search, filterCat, filterBrand, filterLocale])
+  } = useCursorPagination<Product>(fetcher, [search, filterCat, filterBrand, filterLocale, filterStatus])
   useEffect(() => { loadFirst() }, [loadFirst])
+
+  const items = useMemo(() => {
+    const sorted = [...rawItems]
+    sorted.sort((a, b) => {
+      let cmp = 0
+      if (sortKey === "name") {
+        cmp = a.name.localeCompare(b.name)
+      } else {
+        cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      }
+      return sortAsc ? cmp : -cmp
+    })
+    return sorted
+  }, [rawItems, sortKey, sortAsc])
+
+  useEffect(() => { setSelected(new Set()) }, [rawItems])
+
+  const allSelected = items.length > 0 && selected.size === items.length
+  const someSelected = selected.size > 0 && selected.size < items.length
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(items.map(p => p.id)))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortAsc(!sortAsc)
+    } else {
+      setSortKey(key)
+      setSortAsc(false)
+    }
+  }
 
   const toggleStatus = async (product: Product) => {
     try {
@@ -70,9 +127,35 @@ export function ProductPage() {
     try {
       await productApi.delete(id)
       toast.success(t("toast.deleted"))
+      setSelected(prev => { const n = new Set(prev); n.delete(id); return n })
       loadFirst()
     } catch { toast.error(t("toast.failed")) }
   }
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return
+    setBulkDeleting(true)
+    let ok = 0
+    let fail = 0
+    for (const id of selected) {
+      try {
+        await productApi.delete(id)
+        ok++
+      } catch { fail++ }
+    }
+    setBulkDeleting(false)
+    setSelected(new Set())
+    if (fail === 0) toast.success(`${ok} product(s) deleted`)
+    else toast.error(`${ok} deleted, ${fail} failed`)
+    loadFirst()
+  }
+
+  const SortHeader = ({ label, sk }: { label: string; sk: SortKey }) => (
+    <button onClick={() => toggleSort(sk)} className="inline-flex items-center gap-1 hover:text-foreground">
+      {label}
+      <ArrowUpDown className={`size-3 ${sortKey === sk ? "text-foreground" : "text-muted-foreground/40"}`} />
+    </button>
+  )
 
   return (
     <div>
@@ -81,7 +164,7 @@ export function ProductPage() {
           <h1 className="text-2xl font-bold">{t("product.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("common.details")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Input placeholder={`${t("common.search")}...`} value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 w-40 text-sm" />
 
           <SearchableSelect value={filterLocale} onChange={(v) => setFilterLocale(v)}
@@ -90,6 +173,9 @@ export function ProductPage() {
             placeholder="All Categories" options={categories.map(c => ({ value: c.id, label: c.name }))} />
           <SearchableSelect value={filterBrand} onChange={(v) => setFilterBrand(v)}
             placeholder="All Brands" options={brands.map(b => ({ value: b.id, label: b.name }))} />
+          <SearchableSelect value={filterStatus} onChange={(v) => setFilterStatus(v)}
+            placeholder="All Status" options={[{ value: "active", label: "Active" }, { value: "inactive", label: "Inactive" }]} className="h-8 w-32" />
+
           {canManage && (
             <Link to="/products/new">
               <Button><Plus className="mr-1 size-4" />{t("product.new")}</Button>
@@ -103,6 +189,29 @@ export function ProductPage() {
         </div>
       </div>
 
+      {someSelected && canManage && (
+        <div className="mb-3 flex items-center gap-3 rounded-lg border bg-muted/20 px-3 py-2">
+          <span className="text-sm text-muted-foreground">{selected.size} selected</span>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" disabled={bulkDeleting}>
+                {bulkDeleting ? <Loader2 className="mr-1 size-3 animate-spin" /> : <Trash2 className="mr-1 size-3" />}
+                Delete Selected
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader><AlertDialogTitle>Delete {selected.size} product(s)?</AlertDialogTitle>
+                <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleBulkDelete}>Delete All</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+
       {loadError ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-destructive">
           <p className="mb-2 text-sm">{loadError}</p>
@@ -113,6 +222,7 @@ export function ProductPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
+                <th className="w-10 px-3 py-3"><Skeleton className="mx-auto size-4" /></th>
                 <th className="px-4 py-3 text-left font-medium">Locale</th>
                 <th className="px-4 py-3 text-left font-medium">Name</th>
                 <th className="px-4 py-3 text-left font-medium">Category</th>
@@ -124,6 +234,7 @@ export function ProductPage() {
             <tbody>
               {Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="border-b last:border-0">
+                  <td className="px-3 py-3"><Skeleton className="mx-auto size-4 rounded-sm" /></td>
                   <td className="px-4 py-3"><Skeleton className="h-4 w-12" /></td>
                   <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
                   <td className="px-4 py-3"><Skeleton className="h-3 w-24" /></td>
@@ -146,23 +257,31 @@ export function ProductPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium">Locale</th>
-                <th className="px-4 py-3 text-left font-medium">Name</th>
-                <th className="px-4 py-3 text-left font-medium">Category</th>
-                <th className="px-4 py-3 text-left font-medium">Brand</th>
-                <th className="px-4 py-3 text-left font-medium">Status</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
+                <th className="w-10 px-3 py-3">
+                  <button onClick={toggleSelectAll} className="flex items-center justify-center">
+                    {allSelected ? <CheckSquare className="size-4 text-primary" /> : someSelected ? <CheckSquare className="size-4 text-muted-foreground" /> : <Square className="size-4 text-muted-foreground" />}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Locale</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground"><SortHeader label="Name" sk="name" /></th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Brand</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.map((product) => (
                 <tr key={product.id} className={`border-b last:border-0 hover:bg-muted/30 ${isLoading ? "opacity-50" : ""}`}>
+                  <td className="px-3 py-3">
+                    <Checkbox checked={selected.has(product.id)} onCheckedChange={() => toggleSelect(product.id)} />
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium uppercase ${
                       product.locale === "id" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                     }`}>{product.locale}</span>
                   </td>
-                  <td className="px-4 py-3 font-medium">{product.name}</td>
+                  <td className="px-4 py-3 font-medium max-w-60 truncate" title={product.name}>{product.name}</td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{catMap.get(product.category_id ?? "") ?? "-"}</td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{brMap.get(product.brand_id ?? "") ?? "-"}</td>
                   <td className="px-4 py-3">
