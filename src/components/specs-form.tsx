@@ -31,6 +31,7 @@ const CPU_FIELDS: SpecField[] = [
   { key: "multithreading", label: "Multithreading", type: "text" },
   { key: "unlocked", label: "Unlocked", type: "text" },
   { key: "ecc_support", label: "ECC Support", type: "text" },
+  { key: "usage", label: "Usage (Desktop/Laptop/Server...)" },
   { key: "release_date", label: "Release Date" },
   { key: "launch_price", label: "Launch Price ($)", type: "number" },
 ]
@@ -69,6 +70,8 @@ const VGA_FIELDS: SpecField[] = [
   { key: "directx_support", label: "DirectX Support" },
   { key: "vulkan_support", label: "Vulkan Support", type: "text" },
   { key: "opengl_support", label: "OpenGL Support" },
+  { key: "cooling", label: "Cooling (Active/Blower/AIO...)" },
+  { key: "rgb", label: "RGB", type: "text" },
   { key: "release_date", label: "Release Date" },
   { key: "launch_price", label: "Launch Price ($)", type: "number" },
 ]
@@ -125,6 +128,7 @@ const SSD_FIELDS: SpecField[] = [
   { key: "capacity", label: "Capacity", type: "number" },
   { key: "capacity_unit", label: "Capacity Unit" },
   { key: "interface", label: "Interface" },
+  { key: "pcie_gen", label: "PCIe Gen (3.0/4.0/5.0)" },
   { key: "form_factor", label: "Form Factor" },
   { key: "read_speed", label: "Read Speed (MB/s)", type: "number" },
   { key: "write_speed", label: "Write Speed (MB/s)", type: "number" },
@@ -166,6 +170,7 @@ const PSU_FIELDS: SpecField[] = [
   { key: "fanless_mode", label: "Fanless Mode", type: "text" },
   { key: "efficiency_rating", label: "Efficiency Rating" },
   { key: "pfc_type", label: "PFC Type" },
+  { key: "atx_version", label: "ATX Version (2.4/3.0/3.1)" },
   { key: "dimensions", label: "Dimensions (mm)" },
   { key: "weight", label: "Weight (kg)", type: "number" },
   { key: "warranty", label: "Warranty (years)", type: "number" },
