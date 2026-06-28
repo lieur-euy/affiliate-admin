@@ -11,6 +11,7 @@ interface SpecField {
 const CPU_FIELDS: SpecField[] = [
   { key: "brand", label: "Brand" },
   { key: "model", label: "Model" },
+  { key: "family", label: "Family (Alder Lake / Zen 5 / ...)" },
   { key: "cores", label: "Cores", type: "number" },
   { key: "threads", label: "Threads", type: "number" },
   { key: "smp_cpus", label: "SMP CPUs", type: "number" },
