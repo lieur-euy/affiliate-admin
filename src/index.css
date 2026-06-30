@@ -128,3 +128,159 @@
     @apply font-sans;
     }
 }
+
+/* Shadcn typography for TipTap editor content */
+.shadcn-prose h1 {
+  scroll-margin-top: 5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+.shadcn-prose h2 {
+  scroll-margin-top: 5rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.shadcn-prose h2:first-child {
+  margin-top: 0;
+}
+.shadcn-prose h3 {
+  scroll-margin-top: 5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.shadcn-prose h4 {
+  scroll-margin-top: 5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.shadcn-prose p {
+  line-height: 1.75rem;
+}
+.shadcn-prose p:not(:first-child) {
+  margin-top: 1.5rem;
+}
+.shadcn-prose ul {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+  list-style-type: disc;
+}
+.shadcn-prose ul li {
+  margin-top: 0.5rem;
+}
+.shadcn-prose ol {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+  list-style-type: decimal;
+}
+.shadcn-prose ol li {
+  margin-top: 0.5rem;
+}
+.shadcn-prose blockquote {
+  margin-top: 1.5rem;
+  border-left: 2px solid var(--border);
+  padding-left: 1.5rem;
+  font-style: italic;
+}
+.shadcn-prose code {
+  position: relative;
+  border-radius: 0.25rem;
+  background-color: var(--muted);
+  padding: 0.15rem 0.3rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.shadcn-prose pre {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background-color: var(--muted);
+  padding: 1rem;
+}
+.shadcn-prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.8125rem;
+}
+.shadcn-prose a {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.shadcn-prose a:hover {
+  opacity: 0.8;
+}
+.shadcn-prose img {
+  border-radius: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.shadcn-prose table {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  overflow-y: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+}
+.shadcn-prose th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  background-color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.shadcn-prose td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.shadcn-prose strong {
+  font-weight: 700;
+}
+
+/* ProseMirror / TipTap editor overrides */
+.ProseMirror {
+  min-height: inherit;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.ProseMirror .is-empty::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

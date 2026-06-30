@@ -2,7 +2,7 @@ import { useEditor, EditorContent, type Editor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import LinkExtension from "@tiptap/extension-link"
 import ImageExtension from "@tiptap/extension-image"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   List, ListOrdered, Quote, Undo2, Redo2, Link, Code, Heading1, Heading2, Heading3,
@@ -59,6 +59,8 @@ function Toolbar({ editor, onImageClick }: { editor: Editor; onImageClick: () =>
 
 export function RichEditor({ value, onChange, minHeight = 200 }: RichEditorProps) {
   const [mediaOpen, setMediaOpen] = useState(false)
+  const prevValueRef = useRef(value)
+  const [, setTick] = useState(0)
 
   const editor = useEditor({
     extensions: [
@@ -72,14 +74,19 @@ export function RichEditor({ value, onChange, minHeight = 200 }: RichEditorProps
     ],
     content: value || "",
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    onSelectionUpdate: () => setTick((t) => t + 1),
+    onTransaction: () => setTick((t) => t + 1),
     editorProps: {
-      attributes: { class: "prose prose-sm max-w-none focus:outline-none px-3 py-2 min-h-[120px]" },
+      attributes: { class: "shadcn-prose max-w-none focus:outline-none px-3 py-2 min-h-[120px]" },
     },
   })
-  
+
   useEffect(() => {
-    if (editor && editor.getHTML() !== (value || "")) {
-      editor.commands.setContent(value || "")
+    if (!editor) return
+    if (prevValueRef.current === value) return
+    prevValueRef.current = value
+    if (editor.getHTML() !== value) {
+      editor.commands.setContent(value || "", { emitUpdate: false })
     }
   }, [value, editor])
 
